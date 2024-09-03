@@ -5,7 +5,7 @@ provider "aws" {
 resource "aws_rds_cluster" "aurora_postgres" {
   engine             = "aurora-postgresql"
   engine_version     = "14.6"
-  cluster_identifier = "my-aurora-cluster"
+  cluster_identifier = "galega-aurora"
   master_username    = var.db_master_username
   master_password    = var.db_master_password
   skip_final_snapshot = true
