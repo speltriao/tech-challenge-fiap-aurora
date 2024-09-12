@@ -2,6 +2,17 @@ provider "aws" {
   region = "us-east-1"
 }
 
+# Define the DB subnet group with the public subnet
+resource "aws_db_subnet_group" "aurora_subnet_group" {
+  name        = "aurora-subnet-group"
+  subnet_ids   = [
+    "subnet-080e0b47975c79ef1",  # Public subnet ID
+  ]
+  tags = {
+    Name = "aurora-subnet-group"
+  }
+}
+
 # Define the RDS cluster
 resource "aws_rds_cluster" "aurora_postgres" {
   engine             = "aurora-postgresql"
@@ -10,6 +21,7 @@ resource "aws_rds_cluster" "aurora_postgres" {
   master_username    = var.db_master_username
   master_password    = var.db_master_password
   skip_final_snapshot = true
+  db_subnet_group_name = aws_db_subnet_group.aurora_subnet_group.name  # Link the subnet group
 
   # Optional tags for resource identification
   tags = {
