@@ -21,7 +21,7 @@ resource "aws_subnet" "public_subnet_1a" {
 
 resource "aws_subnet" "public_subnet_1b" {
   vpc_id                  = data.aws_vpc.existing_vpc.id
-  cidr_block              = "10.0.240.0/20"
+  cidr_block              = "10.0.192.0/19"
   availability_zone       = "us-east-1b"
   map_public_ip_on_launch = true
 
