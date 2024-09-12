@@ -52,7 +52,7 @@ resource "aws_security_group" "new_sg" {
 }
 
 # Define the DB subnet group with the updated private subnets
-resource "aws_db_subnet_group" "aurora-security-group-new-private" {
+resource "aws_db_subnet_group" "aurora_subnet_group_new" {
   name       = "aurora-subnet-group-new"
   subnet_ids = [
     aws_subnet.private_subnet_aurora_a.id,
@@ -85,7 +85,8 @@ resource "aws_rds_cluster_instance" "aurora_postgres_instance" {
   identifier           = "aurora-db-instance-new"
   cluster_identifier   = aws_rds_cluster.aurora_postgres_new.id
   instance_class       = "db.t4g.medium"
-  engine               = aws_rds_cluster.aurora_postgres_new.engine
+
+  # Removing engine attribute as it is inherited from the cluster
 }
 
 # Output the endpoint of the RDS cluster
