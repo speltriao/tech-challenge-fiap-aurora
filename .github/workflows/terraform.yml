@@ -28,7 +28,7 @@ jobs:
       - name: Check for Existing RDS Cluster
         id: check_rds_cluster
         run: |
-          CLUSTER_ID="galega-db-aurora3"
+          CLUSTER_ID="galega-db-aurora-new"
           EXISTING_CLUSTER=$(aws rds describe-db-clusters --query "DBClusters[?DBClusterIdentifier=='$CLUSTER_ID']" --output text)
           if [ -n "$EXISTING_CLUSTER" ]; then
             echo "RDS cluster '$CLUSTER_ID' already exists."
@@ -68,7 +68,7 @@ jobs:
         id: get_endpoint
         run: |
           echo "Getting RDS cluster endpoint"
-          DB_ENDPOINT=$(aws rds describe-db-clusters --query "DBClusters[?DBClusterIdentifier=='galega-db-aurora3'].Endpoint" --output text)
+          DB_ENDPOINT=$(aws rds describe-db-clusters --query "DBClusters[?DBClusterIdentifier=='galega-db-aurora-new'].Endpoint" --output text)
           echo "DB_ENDPOINT=$DB_ENDPOINT" >> $GITHUB_ENV
 
       - name: Test Database Connectivity
