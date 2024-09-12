@@ -10,7 +10,7 @@ data "aws_vpc" "existing_vpc" {
 # Create new public subnets in the existing VPC
 resource "aws_subnet" "public_subnet_1a" {
   vpc_id                  = data.aws_vpc.existing_vpc.id
-  cidr_block              = "10.1.3.0/24"
+  cidr_block              = "10.1.5.0/24"
   availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
 
@@ -21,7 +21,7 @@ resource "aws_subnet" "public_subnet_1a" {
 
 resource "aws_subnet" "public_subnet_1b" {
   vpc_id                  = data.aws_vpc.existing_vpc.id
-  cidr_block              = "10.1.4.0/24"
+  cidr_block              = "10.1.6.0/24"
   availability_zone       = "us-east-1b"
   map_public_ip_on_launch = true
 
