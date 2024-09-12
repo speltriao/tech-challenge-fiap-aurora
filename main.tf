@@ -53,15 +53,15 @@ resource "aws_security_group" "new_sg" {
   }
 }
 
-# Define the DB subnet group with the newly created subnets
-resource "aws_db_subnet_group" "aurora_subnet_group" {
-  name        = "aurora-subnet-group2"
+# Define the DB subnet group with a new name to avoid conflict
+resource "aws_db_subnet_group" "aurora_subnet_group_new" {
+  name        = "aurora-subnet-group-new"
   subnet_ids  = [
     aws_subnet.public_subnet_1a.id,
     aws_subnet.public_subnet_1b.id
   ]
   tags = {
-    Name = "aurora-subnet-group2"
+    Name = "aurora-subnet-group-new"
   }
 }
 
@@ -73,7 +73,7 @@ resource "aws_rds_cluster" "aurora_postgres_new" {
   master_username    = var.db_master_username
   master_password    = var.db_master_password
   skip_final_snapshot = true
-  db_subnet_group_name = aws_db_subnet_group.aurora_subnet_group.name
+  db_subnet_group_name = aws_db_subnet_group.aurora_subnet_group_new.name
   vpc_security_group_ids = [aws_security_group.new_sg.id]
 
   tags = {
