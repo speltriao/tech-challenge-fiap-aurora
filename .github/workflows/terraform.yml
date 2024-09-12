@@ -28,7 +28,7 @@ jobs:
       - name: Check for Existing RDS Cluster
         id: check_rds_cluster
         run: |
-          CLUSTER_ID="galega-db-aurora-new"
+          CLUSTER_ID="galega-db-aurora3"
           EXISTING_CLUSTER=$(aws rds describe-db-clusters --query "DBClusters[?DBClusterIdentifier=='$CLUSTER_ID']" --output text)
           if [ -n "$EXISTING_CLUSTER" ]; then
             echo "RDS cluster '$CLUSTER_ID' already exists."
@@ -68,8 +68,13 @@ jobs:
         id: get_endpoint
         run: |
           echo "Getting RDS cluster endpoint"
-          DB_ENDPOINT=$(aws rds describe-db-clusters --query "DBClusters[?DBClusterIdentifier=='galega-db-aurora-new'].Endpoint" --output text)
+          DB_ENDPOINT=$(aws rds describe-db-clusters --query "DBClusters[?DBClusterIdentifier=='galega-db-aurora3'].Endpoint" --output text)
           echo "DB_ENDPOINT=$DB_ENDPOINT" >> $GITHUB_ENV
+
+      - name: Test Database Connectivity
+        run: |
+          echo "Testing database connectivity to ${{ env.DB_ENDPOINT }}"
+          nc -zv ${{ env.DB_ENDPOINT }} 5432 || echo "Port 5432 is not reachable"
 
       - name: Run SQL Script
         env:
@@ -87,4 +92,3 @@ jobs:
           env
           
           PGPASSWORD=$DB_PASSWORD psql -h $DB_ENDPOINT -U $DB_USER -d postgres -f scripts/schema.sql
-
