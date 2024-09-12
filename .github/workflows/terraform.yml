@@ -24,26 +24,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
-          
-      - name: Check for Existing RDS Cluster
-        id: check_rds_cluster
-        run: |
-          CLUSTER_ID="tech-galega-db-aurora-new"
-          EXISTING_CLUSTER=$(aws rds describe-db-clusters --query "DBClusters[?DBClusterIdentifier=='$CLUSTER_ID']" --output text)
-          if [ -n "$EXISTING_CLUSTER" ]; then
-            echo "RDS cluster '$CLUSTER_ID' already exists."
-            echo "exists=true" >> $GITHUB_ENV
-          else
-            echo "RDS cluster '$CLUSTER_ID' does not exist."
-            echo "exists=false" >> $GITHUB_ENV
-          fi
 
       - name: Terraform Init
-        if: env.exists == 'false' || env.exists == 'undefined'
         run: terraform init
 
       - name: Terraform Plan
-        if: env.exists == 'false' || env.exists == 'undefined'
         env:
           TF_LOG: DEBUG
           TF_VAR_db_master_username: ${{ secrets.DB_MASTER_USERNAME }}
@@ -51,12 +36,10 @@ jobs:
         run: terraform plan
 
       - name: Terraform Apply
-        if: env.exists == 'false' || env.exists == 'undefined'
         env:
           TF_VAR_db_master_username: ${{ secrets.DB_MASTER_USERNAME }}
           TF_VAR_db_master_password: ${{ secrets.DB_MASTER_PASSWORD }}
         run: terraform apply -auto-approve
 
-      - name: Wait for RDS Cluster to be available
-        if: env.exists == 'false' || env.exists == 'undefined'
+      - name: Wait for Aurora Serverless to be available
         run: sleep 60
