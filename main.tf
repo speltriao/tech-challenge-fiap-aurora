@@ -55,13 +55,13 @@ resource "aws_security_group" "new_sg" {
 
 # Define the DB subnet group with the newly created subnets
 resource "aws_db_subnet_group" "aurora_subnet_group" {
-  name        = "aurora-subnet-group"
+  name        = "aurora-subnet-group2"
   subnet_ids  = [
     aws_subnet.public_subnet_1a.id,
     aws_subnet.public_subnet_1b.id
   ]
   tags = {
-    Name = "aurora-subnet-group"
+    Name = "aurora-subnet-group2"
   }
 }
 
