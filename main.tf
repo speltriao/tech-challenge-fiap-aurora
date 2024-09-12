@@ -53,14 +53,14 @@ resource "aws_security_group" "sg_for_aurora" {
 
 # Define the DB subnet group with the updated private subnets
 resource "aws_db_subnet_group" "db_subnet_group" {
-  name       = "aurora-subnet-group"
+  name       = "aurora-subnet-group-unique"
   subnet_ids = [
     aws_subnet.private_subnet_aurora_a.id,
     aws_subnet.private_subnet_aurora_b.id
   ]
 
   tags = {
-    Name = "aurora-subnet-group"
+    Name = "aurora-subnet-group-unique"
   }
 }
 
