@@ -26,7 +26,7 @@ resource "aws_rds_cluster" "aurora_postgres" {
   master_username    = var.db_master_username
   master_password    = var.db_master_password
   skip_final_snapshot = true
-  db_subnet_group_name = aws_db_subnet_group.aurora_subnet_group.name  # Link the subnet group
+  db_subnet_group_name = aws_db_subnet_group.aurora_subnet_group1.name  # Link the subnet group
   vpc_security_group_ids = [data.aws_security_group.existing_sg.id]  # Reference to the existing security group
 
   # Optional tags for resource identification
