@@ -61,7 +61,10 @@ jobs:
 
       - name: Terraform Output
         id: terraform_output
-        run: echo "ENDPOINT=$(terraform output -raw endpoint)" >> $GITHUB_ENV
+        run: |
+          ENDPOINT=$(terraform output -raw endpoint)
+          echo "Terraform output endpoint: $ENDPOINT"  # Debugging line
+          echo "ENDPOINT=$ENDPOINT" >> $GITHUB_ENV
 
       - name: Install PostgreSQL Client
         run: sudo apt-get install -y postgresql-client
