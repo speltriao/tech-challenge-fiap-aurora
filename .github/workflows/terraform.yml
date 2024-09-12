@@ -78,4 +78,13 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_MASTER_PASSWORD }}
         run: |
           echo "Running SQL script against Aurora PostgreSQL"
+          
+          echo "DB_ENDPOINT: $DB_ENDPOINT"
+          echo "DB_USER: $DB_USER"
+          echo "DB_PASSWORD: $DB_PASSWORD"
+          
+          echo "Environment Variables:"
+          env
+          
           PGPASSWORD=$DB_PASSWORD psql -h $DB_ENDPOINT -U $DB_USER -d postgres -f scripts/schema.sql
+
