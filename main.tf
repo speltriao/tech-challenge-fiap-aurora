@@ -65,11 +65,11 @@ resource "aws_db_subnet_group" "aurora_subnet_group" {
   }
 }
 
-# Define the RDS cluster
-resource "aws_rds_cluster" "aurora_postgres" {
+# Define the RDS cluster with a new name to avoid conflict
+resource "aws_rds_cluster" "aurora_postgres_new" {
   engine             = "aurora-postgresql"
   engine_version     = "14.6"
-  cluster_identifier = "galega-db-aurora1"
+  cluster_identifier = "galega-db-aurora-new"
   master_username    = var.db_master_username
   master_password    = var.db_master_password
   skip_final_snapshot = true
@@ -77,19 +77,19 @@ resource "aws_rds_cluster" "aurora_postgres" {
   vpc_security_group_ids = [aws_security_group.new_sg.id]
 
   tags = {
-    Name = "galega-db-aurora2"
+    Name = "galega-db-aurora-new"
   }
 }
 
 # Define the RDS cluster instance
 resource "aws_rds_cluster_instance" "aurora_postgres_instance" {
-  identifier           = "aurora-db-instance-3"
-  cluster_identifier   = aws_rds_cluster.aurora_postgres.id
+  identifier           = "aurora-db-instance-new"
+  cluster_identifier   = aws_rds_cluster.aurora_postgres_new.id
   instance_class       = "db.t4g.medium"
-  engine               = aws_rds_cluster.aurora_postgres.engine
+  engine               = aws_rds_cluster.aurora_postgres_new.engine
 }
 
 # Output the endpoint of the RDS cluster
 output "endpoint" {
-  value = aws_rds_cluster.aurora_postgres.endpoint
+  value = aws_rds_cluster.aurora_postgres_new.endpoint
 }
