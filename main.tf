@@ -25,7 +25,7 @@ resource "aws_rds_cluster" "aurora_postgres" {
 
   # Optional tags for resource identification
   tags = {
-    Name = "galega-aurora"
+    Name = "galega-db-aurora"
   }
 }
 
