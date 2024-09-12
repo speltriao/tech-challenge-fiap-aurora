@@ -28,18 +28,6 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Check if RDS Cluster Exists
-        id: check_rds
-        run: |
-          cluster_status=$(aws rds describe-db-clusters --db-cluster-identifier galega-aurora --query 'DBClusters[0].Status' --output text || echo "not found")
-          if [ "$cluster_status" != "not found" ]; then
-            echo "RDS Cluster exists."
-            echo "RDS_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "RDS Cluster does not exist."
-            echo "RDS_EXISTS=false" >> $GITHUB_ENV
-          fi
-
       - name: Terraform Plan
         env:
           TF_LOG: DEBUG
@@ -48,54 +36,22 @@ jobs:
         run: terraform plan
 
       - name: Terraform Apply
-        if: env.RDS_EXISTS == 'false'
         env:
           TF_VAR_db_master_username: ${{ secrets.DB_MASTER_USERNAME }}
           TF_VAR_db_master_password: ${{ secrets.DB_MASTER_PASSWORD }}
         run: terraform apply -auto-approve
 
-      - name: Terraform Refresh
-        run: terraform refresh
+      - name: Wait for RDS Cluster to be available
+        run: sleep 60
 
-      - name: Terraform Output
-        id: terraform_output
-        run: |
-          echo "Debugging Terraform output..."
-          terraform output -raw endpoint
-          echo "ENDPOINT=$(terraform output -raw endpoint)" >> $GITHUB_ENV
-
-      - name: Install PostgreSQL Client
+      - name: Install PostgreSQL client
         run: sudo apt-get install -y postgresql-client
-
-      - name: Check if Database Exists
-        id: check_db
-        env:
-          PGHOST: ${{ env.ENDPOINT }}
-          PGUSER: ${{ secrets.DB_MASTER_USERNAME }}
-          PGPASSWORD: ${{ secrets.DB_MASTER_PASSWORD }}
-        run: |
-          if psql -h $PGHOST -U $PGUSER -lqt | cut -d \| -f 1 | grep -qw galega_burguer; then
-            echo "Database exists."
-            echo "DB_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "Database does not exist."
-            echo "DB_EXISTS=false" >> $GITHUB_ENV
-          fi
-
-      - name: Create Database (if not exists)
-        if: env.DB_EXISTS == 'false'
-        env:
-          PGHOST: ${{ env.ENDPOINT }}
-          PGUSER: ${{ secrets.DB_MASTER_USERNAME }}
-          PGPASSWORD: ${{ secrets.DB_MASTER_PASSWORD }}
-        run: |
-          psql -h $PGHOST -U $PGUSER -c "CREATE DATABASE galega_burguer;"
 
       - name: Run SQL Script
         env:
-          PGHOST: ${{ env.ENDPOINT }}
-          PGUSER: ${{ secrets.DB_MASTER_USERNAME }}
-          PGPASSWORD: ${{ secrets.DB_MASTER_PASSWORD }}
-          PGDATABASE: galega_burguer
+          DB_ENDPOINT: ${{ steps.apply.outputs.endpoint }}
+          DB_USER: ${{ secrets.DB_MASTER_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_MASTER_PASSWORD }}
         run: |
-          psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f scripts/schema.sql
+          echo "Running SQL script against Aurora PostgreSQL"
+          PGPASSWORD=$DB_PASSWORD psql -h $DB_ENDPOINT -U $DB_USER -d postgres -f scripts/schema.sql
