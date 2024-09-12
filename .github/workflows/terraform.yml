@@ -25,6 +25,19 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
+      - name: Check for Existing RDS Cluster
+        id: check_rds_cluster
+        run: |
+          CLUSTER_ID="galega-aurora"
+          EXISTING_CLUSTER=$(aws rds describe-db-clusters --query "DBClusters[?DBClusterIdentifier=='$CLUSTER_ID']" --output text)
+          if [ -n "$EXISTING_CLUSTER" ]; then
+            echo "RDS cluster '$CLUSTER_ID' already exists."
+            echo "exists=true" >> $GITHUB_ENV
+          else
+            echo "RDS cluster '$CLUSTER_ID' does not exist."
+            echo "exists=false" >> $GITHUB_ENV
+          fi
+
       - name: Terraform Init
         run: terraform init
 
@@ -36,18 +49,22 @@ jobs:
         run: terraform plan
 
       - name: Terraform Apply
+        if: env.exists == 'false'
         env:
           TF_VAR_db_master_username: ${{ secrets.DB_MASTER_USERNAME }}
           TF_VAR_db_master_password: ${{ secrets.DB_MASTER_PASSWORD }}
         run: terraform apply -auto-approve
 
       - name: Wait for RDS Cluster to be available
+        if: env.exists == 'false'
         run: sleep 60
 
       - name: Install PostgreSQL client
+        if: env.exists == 'false'
         run: sudo apt-get install -y postgresql-client
 
       - name: Run SQL Script
+        if: env.exists == 'false'
         env:
           DB_ENDPOINT: ${{ steps.apply.outputs.endpoint }}
           DB_USER: ${{ secrets.DB_MASTER_USERNAME }}
