@@ -28,7 +28,7 @@ jobs:
       - name: Check for Existing RDS Cluster
         id: check_rds_cluster
         run: |
-          CLUSTER_ID="galega-db-aurora-new"
+          CLUSTER_ID="tech-galega-db-aurora-new"
           EXISTING_CLUSTER=$(aws rds describe-db-clusters --query "DBClusters[?DBClusterIdentifier=='$CLUSTER_ID']" --output text)
           if [ -n "$EXISTING_CLUSTER" ]; then
             echo "RDS cluster '$CLUSTER_ID' already exists."
