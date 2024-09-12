@@ -8,7 +8,7 @@ data "aws_security_group" "existing_sg" {
 
 # Define the DB subnet group with the public subnet
 resource "aws_db_subnet_group" "aurora_subnet_group1" {
-  name        = "aurora-subnet-group"
+  name        = "aurora-subnet-group1"
   subnet_ids   = [
     "subnet-080e0b47975c79ef1",  # us-east-1a
     "subnet-0078f4bc5eacaa4fb"   # us-east-1b
