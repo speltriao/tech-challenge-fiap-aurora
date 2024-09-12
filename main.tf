@@ -29,20 +29,3 @@ resource "aws_rds_cluster_instance" "aurora_postgres_instance" {
 output "endpoint" {
   value = aws_rds_cluster.aurora_postgres.endpoint
 }
-
-# Optional output to debug and confirm other important details
-output "cluster_id" {
-  value = aws_rds_cluster.aurora_postgres.id
-}
-
-output "cluster_status" {
-  value = aws_rds_cluster.aurora_postgres.status
-}
-
-output "instance_id" {
-  value = aws_rds_cluster_instance.aurora_postgres_instance.id
-}
-
-output "instance_status" {
-  value = aws_rds_cluster_instance.aurora_postgres_instance.status
-}
