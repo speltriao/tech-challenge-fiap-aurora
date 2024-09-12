@@ -24,15 +24,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
-
-      - name: Print Environment Variables
-        run: |
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-          echo "AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }}"
-          echo "DB_MASTER_USERNAME=${{ secrets.DB_MASTER_USERNAME }}"
-          echo "DB_MASTER_PASSWORD=${{ secrets.DB_MASTER_PASSWORD }}"
-
+          
       - name: Check for Existing RDS Cluster
         id: check_rds_cluster
         run: |
