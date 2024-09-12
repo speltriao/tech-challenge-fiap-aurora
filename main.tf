@@ -3,34 +3,34 @@ provider "aws" {
 }
 
 # Reference to an existing VPC
-data "aws_vpc" "existing_vpc" {
+data "aws_vpc" "vpc_reference" {
   id = "vpc-00a9a81b9e176bda7"
 }
 
 # Create new private subnets in the existing VPC
-resource "aws_subnet" "private_subnet_aurora_a" {
-  vpc_id            = data.aws_vpc.existing_vpc.id
-  cidr_block        = "10.1.7.0/24"
+resource "aws_subnet" "private_subnet_1" {
+  vpc_id            = data.aws_vpc.vpc_reference.id
+  cidr_block        = "10.1.8.0/24"
   availability_zone = "us-east-1a"
 
   tags = {
-    Name = "private_subnet_aurora_a"
+    Name = "private_subnet_1"
   }
 }
 
-resource "aws_subnet" "private_subnet_aurora_b" {
-  vpc_id            = data.aws_vpc.existing_vpc.id
-  cidr_block        = "10.1.6.0/24"
+resource "aws_subnet" "private_subnet_2" {
+  vpc_id            = data.aws_vpc.vpc_reference.id
+  cidr_block        = "10.1.9.0/24"
   availability_zone = "us-east-1b"
 
   tags = {
-    Name = "private_subnet_aurora_b"
+    Name = "private_subnet_2"
   }
 }
 
 # Create a new security group in the existing VPC
-resource "aws_security_group" "new_sg" {
-  vpc_id = data.aws_vpc.existing_vpc.id
+resource "aws_security_group" "sg_for_aurora" {
+  vpc_id = data.aws_vpc.vpc_reference.id
 
   egress {
     from_port   = 0
@@ -47,48 +47,49 @@ resource "aws_security_group" "new_sg" {
   }
 
   tags = {
-    Name = "aurora-security-group-new-private"
+    Name = "sg_for_aurora"
   }
 }
 
 # Define the DB subnet group with the updated private subnets
-resource "aws_db_subnet_group" "aurora_subnet_group_new" {
-  name       = "aurora-subnet-group-new1"
+resource "aws_db_subnet_group" "db_subnet_group" {
+  name       = "db_subnet_group_name"
   subnet_ids = [
-    aws_subnet.private_subnet_aurora_a.id,
-    aws_subnet.private_subnet_aurora_b.id
+    aws_subnet.private_subnet_1.id,
+    aws_subnet.private_subnet_2.id
   ]
 
   tags = {
-    Name = "aurora-subnet-group-new1-private"
+    Name = "db_subnet_group_name"
   }
 }
 
-# Define the RDS cluster with a new name to avoid conflict
-resource "aws_rds_cluster" "aurora_postgres_new" {
+# Define the RDS cluster with Serverless mode and set the database name
+resource "aws_rds_cluster" "serverless_aurora_pg" {
   engine             = "aurora-postgresql"
+  engine_mode        = "serverless" # Use serverless mode
   engine_version     = "14.6"
-  cluster_identifier = "tech-galega-db-aurora-new"
-  master_username    = var.db_master_username
-  master_password    = var.db_master_password
+  cluster_identifier = "serverless_aurora_pg_cluster"
+  master_username    = var.db_admin_username
+  master_password    = var.db_admin_password
   skip_final_snapshot = true
-  db_subnet_group_name = aws_db_subnet_group.aurora_subnet_group_new.name
-  vpc_security_group_ids = [aws_security_group.new_sg.id]
+  db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
+  vpc_security_group_ids = [aws_security_group.sg_for_aurora.id]
+  database_name      = "galega"
 
   tags = {
-    Name = "tech-galega-db-aurora-new"
+    Name = "serverless_aurora_pg"
   }
-}
 
-# Define the RDS cluster instance
-resource "aws_rds_cluster_instance" "aurora_postgres_instance" {
-  identifier           = "aurora-db-instance-new"
-  cluster_identifier   = aws_rds_cluster.aurora_postgres_new.id
-  instance_class       = "db.t4g.medium"
-  engine               = aws_rds_cluster.aurora_postgres_new.engine
+  scaling_configuration {
+    auto_pause               = true
+    min_capacity             = 1   # Set the minimum capacity to 1 ACU
+    max_capacity             = 2   # Set the maximum capacity to 2 ACUs
+    seconds_until_auto_pause = 600 # Auto-pause delay set to 10 minutes
+  }
 }
 
 # Output the endpoint of the RDS cluster
-output "endpoint" {
-  value = aws_rds_cluster.aurora_postgres_new.endpoint
+output "aurora_cluster_endpoint" {
+  value = aws_rds_cluster.serverless_aurora_pg.endpoint
 }
