@@ -39,9 +39,11 @@ jobs:
           fi
 
       - name: Terraform Init
+        if: env.exists == 'false' || env.exists == 'undefined'
         run: terraform init
 
       - name: Terraform Plan
+        if: env.exists == 'false' || env.exists == 'undefined'
         env:
           TF_LOG: DEBUG
           TF_VAR_db_master_username: ${{ secrets.DB_MASTER_USERNAME }}
@@ -49,24 +51,29 @@ jobs:
         run: terraform plan
 
       - name: Terraform Apply
-        if: env.exists == 'false'
+        if: env.exists == 'false' || env.exists == 'undefined'
         env:
           TF_VAR_db_master_username: ${{ secrets.DB_MASTER_USERNAME }}
           TF_VAR_db_master_password: ${{ secrets.DB_MASTER_PASSWORD }}
         run: terraform apply -auto-approve
 
       - name: Wait for RDS Cluster to be available
-        if: env.exists == 'false'
+        if: env.exists == 'false' || env.exists == 'undefined'
         run: sleep 60
 
       - name: Install PostgreSQL client
-        if: env.exists == 'false'
         run: sudo apt-get install -y postgresql-client
 
+      - name: Get RDS Endpoint
+        id: get_endpoint
+        run: |
+          echo "Getting RDS cluster endpoint"
+          DB_ENDPOINT=$(aws rds describe-db-clusters --query "DBClusters[?DBClusterIdentifier=='galega-aurora'].Endpoint" --output text)
+          echo "DB_ENDPOINT=$DB_ENDPOINT" >> $GITHUB_ENV
+
       - name: Run SQL Script
-        if: env.exists == 'false'
         env:
-          DB_ENDPOINT: ${{ steps.apply.outputs.endpoint }}
+          DB_ENDPOINT: ${{ env.DB_ENDPOINT }}
           DB_USER: ${{ secrets.DB_MASTER_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_MASTER_PASSWORD }}
         run: |
