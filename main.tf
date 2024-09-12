@@ -85,8 +85,7 @@ resource "aws_rds_cluster_instance" "aurora_postgres_instance" {
   identifier           = "aurora-db-instance-new"
   cluster_identifier   = aws_rds_cluster.aurora_postgres_new.id
   instance_class       = "db.t4g.medium"
-
-  # Removing engine attribute as it is inherited from the cluster
+  engine               = aws_rds_cluster.aurora_postgres_new.engine
 }
 
 # Output the endpoint of the RDS cluster
