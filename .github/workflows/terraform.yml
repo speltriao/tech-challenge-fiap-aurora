@@ -62,9 +62,13 @@ jobs:
       - name: Terraform Output
         id: terraform_output
         run: |
-          ENDPOINT=$(terraform output -raw endpoint)
-          echo "Terraform output endpoint: $ENDPOINT"  # Debugging line
-          echo "ENDPOINT=$ENDPOINT" >> $GITHUB_ENV
+          OUTPUT=$(terraform output -raw endpoint 2>&1)
+          if [[ "$OUTPUT" == *"Warning:"* || "$OUTPUT" == *"Error:"* || -z "$OUTPUT" ]]; then
+            echo "Error retrieving Terraform output."
+            echo "ENDPOINT=" >> $GITHUB_ENV
+          else
+            echo "ENDPOINT=$OUTPUT" >> $GITHUB_ENV
+          fi
 
       - name: Install PostgreSQL Client
         run: sudo apt-get install -y postgresql-client
