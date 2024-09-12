@@ -69,13 +69,13 @@ resource "aws_rds_cluster" "serverless_aurora_pg" {
   engine             = "aurora-postgresql"
   engine_mode        = "serverless"
   engine_version     = "14.6"
-  cluster_identifier = "serverless_aurora_pg_cluster"
+  cluster_identifier = "serverless-aurora-pg-cluster"  # Adjusted identifier
   master_username    = var.db_master_username
   master_password    = var.db_master_password
   skip_final_snapshot = true
   db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
   vpc_security_group_ids = [aws_security_group.sg_for_aurora.id]
-  database_name      = "my_database"
+  database_name      = "galega"
 
   tags = {
     Name = "serverless_aurora_pg"
