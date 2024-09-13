@@ -64,10 +64,10 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   }
 }
 
-# Define the Aurora Serverless v2 RDS cluster without instance
+# Define the Aurora Serverless v2 RDS cluster
 resource "aws_rds_cluster" "serverless_v2_aurora_pg" {
   engine             = "aurora-postgresql"
-  engine_version     = "15.2"  # Updated engine version for Serverless v2
+  engine_version     = "15.2"  # Ensure this version is supported for Serverless v2
   cluster_identifier = "serverless-v2-aurora-pg-cluster"  # Unique identifier
   master_username    = var.db_master_username
   master_password    = var.db_master_password
@@ -75,6 +75,15 @@ resource "aws_rds_cluster" "serverless_v2_aurora_pg" {
   db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
   vpc_security_group_ids = [aws_security_group.sg_for_aurora.id]
   database_name      = "galega"
+  engine_mode        = "provisioned"  # Correct mode for Serverless v2
+  instance_class = "db.serverless"
+
+  scaling_configuration {
+    auto_pause          = true   # Enable auto-pause to save costs when idle
+    max_capacity        = 6     # Max Aurora Capacity Units (ACUs)
+    min_capacity        = 2      # Min Aurora Capacity Units (ACUs)
+    seconds_until_auto_pause = 300  # Time to wait before auto-pausing, in seconds
+  }
 
   tags = {
     Name = "serverless_v2_aurora_pg"
