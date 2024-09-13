@@ -64,7 +64,7 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   }
 }
 
-# Define the Aurora Serverless v2 RDS cluster without scaling_configuration
+# Define the Aurora Serverless v2 RDS cluster without instance
 resource "aws_rds_cluster" "serverless_v2_aurora_pg" {
   engine             = "aurora-postgresql"
   engine_version     = "15.2"  # Updated engine version for Serverless v2
@@ -79,14 +79,6 @@ resource "aws_rds_cluster" "serverless_v2_aurora_pg" {
   tags = {
     Name = "serverless_v2_aurora_pg"
   }
-}
-
-# Define the RDS cluster instance with db.serverless instance class
-resource "aws_rds_cluster_instance" "aurora_pg_instance" {
-  identifier           = "aurora-pg-instance"
-  cluster_identifier   = aws_rds_cluster.serverless_v2_aurora_pg.id
-  instance_class       = "db.serverless"  # Set instance class for Serverless v2
-  engine               = aws_rds_cluster.serverless_v2_aurora_pg.engine
 }
 
 # Output the endpoint of the RDS cluster
