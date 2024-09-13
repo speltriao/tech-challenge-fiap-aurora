@@ -20,7 +20,7 @@ resource "aws_subnet" "private_subnet_aurora_a" {
 
 resource "aws_subnet" "private_subnet_aurora_b" {
   vpc_id            = data.aws_vpc.existing_vpc.id
-  cidr_block        = "10.1.8.0/24"
+  cidr_block        = "10.1.10.0/24"
   availability_zone = "us-east-1b"
 
   tags = {
@@ -51,25 +51,24 @@ resource "aws_security_group" "sg_for_aurora" {
   }
 }
 
-# Define the DB subnet group with the updated private subnets
+# Define the DB subnet group with a new unique name
 resource "aws_db_subnet_group" "db_subnet_group" {
-  name       = "aurora-subnet-group-unique"
+  name       = "aurora-subnet-group-unique"  # Updated unique name
   subnet_ids = [
     aws_subnet.private_subnet_aurora_a.id,
     aws_subnet.private_subnet_aurora_b.id
   ]
 
   tags = {
-    Name = "aurora-subnet-group-unique"
+    Name = "aurora-subnet-group-unique"  # Updated unique name
   }
 }
 
-# Define the Aurora Serverless RDS cluster
-resource "aws_rds_cluster" "serverless_aurora_pg" {
+# Define the Aurora Serverless v2 RDS cluster
+resource "aws_rds_cluster" "serverless_v2_aurora_pg" {
   engine             = "aurora-postgresql"
-  engine_mode        = "serverless"
-  engine_version     = "14.6"
-  cluster_identifier = "serverless-aurora-pg-cluster"  # Adjusted identifier
+  engine_version     = "15.2"  # Updated engine version for Serverless v2
+  cluster_identifier = "serverless-v2-aurora-pg-cluster"  # Unique identifier
   master_username    = var.db_master_username
   master_password    = var.db_master_password
   skip_final_snapshot = true
@@ -78,7 +77,7 @@ resource "aws_rds_cluster" "serverless_aurora_pg" {
   database_name      = "galega"
 
   tags = {
-    Name = "serverless_aurora_pg"
+    Name = "serverless_v2_aurora_pg"
   }
 
   scaling_configuration {
@@ -89,7 +88,15 @@ resource "aws_rds_cluster" "serverless_aurora_pg" {
   }
 }
 
+# Define the RDS cluster instance with db.serverless instance class
+resource "aws_rds_cluster_instance" "aurora_pg_instance" {
+  identifier           = "aurora-pg-instance"
+  cluster_identifier   = aws_rds_cluster.serverless_v2_aurora_pg.id
+  instance_class       = "db.serverless"  # Set instance class for Serverless v2
+  engine               = aws_rds_cluster.serverless_v2_aurora_pg.engine
+}
+
 # Output the endpoint of the RDS cluster
 output "endpoint" {
-  value = aws_rds_cluster.serverless_aurora_pg.endpoint
+  value = aws_rds_cluster.serverless_v2_aurora_pg.endpoint
 }
