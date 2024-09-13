@@ -69,30 +69,30 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   }
 }
 
-# Define the Aurora Serverless v2 RDS cluster
-resource "aws_rds_cluster" "serverless_v2_aurora_pg" {
+# Define the Aurora Serverless v1 RDS cluster
+resource "aws_rds_cluster" "serverless_aurora_pg" {
   engine             = "aurora-postgresql"
   engine_version     = "13.12"
-  cluster_identifier = "serverless-v2-aurora-pg-cluster"  # Unique identifier
+  cluster_identifier = "serverless-aurora-pg-cluster"  # Unique identifier
   master_username    = var.db_master_username
   master_password    = var.db_master_password
   skip_final_snapshot = true
   db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
   vpc_security_group_ids = [aws_security_group.sg_for_aurora.id]
   database_name      = "galega"
-  engine_mode        = "serverless"  # Correct mode for Serverless v2
+  engine_mode        = "serverless"  # Mode for Serverless v1
 
-  serverlessv2_scaling_configuration {
-    max_capacity        = 6     # Max Aurora Capacity Units (ACUs)
-    min_capacity        = 2     # Min Aurora Capacity Units (ACUs)
+  scaling_configuration {
+    min_capacity = 2  # Minimum Aurora Capacity Units (ACUs)
+    max_capacity = 6  # Maximum Aurora Capacity Units (ACUs)
   }
 
   tags = {
-    Name = "serverless_v2_aurora_pg"
+    Name = "serverless_aurora_pg"
   }
 }
 
 # Output the endpoint of the RDS cluster
 output "endpoint" {
-  value = aws_rds_cluster.serverless_v2_aurora_pg.endpoint
+  value = aws_rds_cluster.serverless_aurora_pg.endpoint
 }
