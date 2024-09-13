@@ -25,19 +25,10 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
-      - name: Check if Aurora Cluster Exists
-        id: check_aurora
-        run: |
-          CLUSTER_ID="serverless-aurora-pg-cluster"
-          STATUS=$(aws rds describe-db-clusters --db-cluster-identifier "$CLUSTER_ID" --query 'DBClusters[0].Status' --output text 2>/dev/null || echo "not_found")
-          echo "CLUSTER_STATUS=$STATUS" >> $GITHUB_ENV
-
       - name: Terraform Init
-        if: env.CLUSTER_STATUS == 'not_found'
         run: terraform init
 
       - name: Terraform Plan
-        if: env.CLUSTER_STATUS == 'not_found'
         env:
           TF_LOG: DEBUG
           TF_VAR_db_master_username: ${{ secrets.DB_MASTER_USERNAME }}
@@ -45,14 +36,12 @@ jobs:
         run: terraform plan
 
       - name: Terraform Apply
-        if: env.CLUSTER_STATUS == 'not_found'
         env:
           TF_VAR_db_master_username: ${{ secrets.DB_MASTER_USERNAME }}
           TF_VAR_db_master_password: ${{ secrets.DB_MASTER_PASSWORD }}
         run: terraform apply -auto-approve
 
       - name: Wait for Aurora Serverless to be available
-        if: env.CLUSTER_STATUS == 'not_found'
         id: wait_for_db
         run: |
           CLUSTER_ID="serverless-aurora-pg-cluster"
@@ -71,16 +60,16 @@ jobs:
 
       - name: Get Aurora Serverless DB Endpoint
         id: get_db_endpoint
-        if: env.CLUSTER_STATUS == 'not_found'
         run: |
           ENDPOINT=$(aws rds describe-db-clusters --db-cluster-identifier "serverless-aurora-pg-cluster" --query 'DBClusters[0].Endpoint' --output text)
           echo "DB_ENDPOINT=$ENDPOINT" >> $GITHUB_ENV
 
       - name: Install PostgreSQL Client
-        if: env.CLUSTER_STATUS == 'not_found'
         run: sudo apt-get install -y postgresql-client
 
       - name: Run SQL Commands
-        if: env.CLUSTER_STATUS == 'not_found' || env.CLUSTER_STATUS == 'available'
         run: |
+          # Connect to the database and run SQL commands from the file
           psql -h ${{ env.DB_ENDPOINT }} -U ${{ secrets.DB_MASTER_USERNAME }} -d galega -f path/to/your/sql-file.sql
+        env:
+          PGPASSWORD: ${{ secrets.DB_MASTER_PASSWORD }}
