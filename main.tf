@@ -78,10 +78,8 @@ resource "aws_rds_cluster" "serverless_v2_aurora_pg" {
   engine_mode        = "provisioned"  # Correct mode for Serverless v2
 
   serverlessv2_scaling_configuration {
-    auto_pause          = true   # Enable auto-pause to save costs when idle
     max_capacity        = 6     # Max Aurora Capacity Units (ACUs)
     min_capacity        = 2      # Min Aurora Capacity Units (ACUs)
-    seconds_until_auto_pause = 300  # Time to wait before auto-pausing, in seconds
   }
 
   tags = {
