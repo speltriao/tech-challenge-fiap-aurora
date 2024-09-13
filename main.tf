@@ -84,7 +84,7 @@ resource "aws_rds_cluster" "serverless_aurora_pg" {
 
   scaling_configuration {
     min_capacity = 2  # Minimum Aurora Capacity Units (ACUs)
-    max_capacity = 6  # Maximum Aurora Capacity Units (ACUs)
+    max_capacity = 4  # Maximum Aurora Capacity Units (ACUs)
   }
 
   tags = {
