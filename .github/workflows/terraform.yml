@@ -71,10 +71,11 @@ jobs:
 
       - name: Get Aurora Serverless DB Endpoint
         id: get_db_endpoint
-        if: env.CLUSTER_STATUS == 'not_found'
         run: |
-          ENDPOINT=$(aws rds describe-db-clusters --db-cluster-identifier "serverless-aurora-pg-cluster" --query 'DBClusters[0].Endpoint' --output text)
+          CLUSTER_ID="serverless-aurora-pg-cluster"
+          ENDPOINT=$(aws rds describe-db-clusters --db-cluster-identifier "$CLUSTER_ID" --query 'DBClusters[0].Endpoint' --output text)
           echo "DB_ENDPOINT=$ENDPOINT" >> $GITHUB_ENV
+          echo "Endpoint: $ENDPOINT"  # Debugging step to ensure endpoint is retrieved
 
       - name: Install PostgreSQL Client
         run: sudo apt-get install -y postgresql-client
@@ -84,7 +85,6 @@ jobs:
           echo "Database Endpoint: ${{ env.DB_ENDPOINT }}"
           echo "Database User: ${{ secrets.DB_MASTER_USERNAME }}"
           echo "Database Name: galega"
-        # Do not print sensitive information like passwords
         env:
           DB_ENDPOINT: ${{ env.DB_ENDPOINT }}
           DB_MASTER_USERNAME: ${{ secrets.DB_MASTER_USERNAME }}
@@ -92,6 +92,11 @@ jobs:
       - name: Run SQL Commands
         if: env.CLUSTER_STATUS == 'available' || env.CLUSTER_STATUS == 'not_found'
         run: |
+          # Check if the endpoint variable is set before running psql
+          if [ -z "${{ env.DB_ENDPOINT }}" ]; then
+            echo "DB_ENDPOINT is empty. Unable to connect to the database."
+            exit 1
+          fi
           # Connect to the database and run SQL commands from the file
           psql -h ${{ env.DB_ENDPOINT }} -U ${{ secrets.DB_MASTER_USERNAME }} -d galega -f path/to/your/sql-file.sql
         env:
