@@ -4,7 +4,7 @@ provider "aws" {
 
 # Reference to an existing VPC
 data "aws_vpc" "existing_vpc" {
-  id = "vpc-00a9a81b9e176bda7"
+  id = "vpc-01fc04d120eab4343"
 }
 
 # Create new private subnets in the existing VPC
