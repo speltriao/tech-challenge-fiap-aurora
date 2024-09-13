@@ -76,7 +76,6 @@ resource "aws_rds_cluster" "serverless_v2_aurora_pg" {
   vpc_security_group_ids = [aws_security_group.sg_for_aurora.id]
   database_name      = "galega"
   engine_mode        = "provisioned"  # Correct mode for Serverless v2
-  instance_class = "db.serverless"
 
   scaling_configuration {
     auto_pause          = true   # Enable auto-pause to save costs when idle
