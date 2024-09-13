@@ -64,7 +64,7 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   }
 }
 
-# Define the Aurora Serverless v2 RDS cluster
+# Define the Aurora Serverless v2 RDS cluster without scaling_configuration
 resource "aws_rds_cluster" "serverless_v2_aurora_pg" {
   engine             = "aurora-postgresql"
   engine_version     = "15.2"  # Updated engine version for Serverless v2
@@ -78,13 +78,6 @@ resource "aws_rds_cluster" "serverless_v2_aurora_pg" {
 
   tags = {
     Name = "serverless_v2_aurora_pg"
-  }
-
-  scaling_configuration {
-    auto_pause               = true
-    min_capacity             = 1
-    max_capacity             = 2
-    seconds_until_auto_pause = 600
   }
 }
 
