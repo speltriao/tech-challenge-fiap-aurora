@@ -10,7 +10,7 @@ data "aws_vpc" "existing_vpc" {
 # Create new private subnets in the existing VPC
 resource "aws_subnet" "private_subnet_aurora_a" {
   vpc_id            = data.aws_vpc.existing_vpc.id
-  cidr_block        = "10.1.9.0/24"
+  cidr_block        = "10.1.11.0/24"
   availability_zone = "us-east-1a"
 
   tags = {
@@ -20,7 +20,7 @@ resource "aws_subnet" "private_subnet_aurora_a" {
 
 resource "aws_subnet" "private_subnet_aurora_b" {
   vpc_id            = data.aws_vpc.existing_vpc.id
-  cidr_block        = "10.1.10.0/24"
+  cidr_block        = "10.1.12.0/24"
   availability_zone = "us-east-1b"
 
   tags = {
