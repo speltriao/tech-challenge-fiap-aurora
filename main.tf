@@ -12,7 +12,7 @@ data "aws_subnet" "public_subnet" {
   id = "subnet-0dd8d163c6bb3ad67"
 }
 
-# Create new private subnets in the existing VPC
+# Create a new private subnet in the existing VPC
 resource "aws_subnet" "private_subnet_aurora_a" {
   vpc_id            = data.aws_vpc.existing_vpc.id
   cidr_block        = "10.1.11.0/24"
@@ -56,13 +56,12 @@ resource "aws_security_group" "sg_for_aurora" {
   }
 }
 
-# Define the DB subnet group with a new unique name
+# Define the DB subnet group with the existing and new private subnets
 resource "aws_db_subnet_group" "db_subnet_group" {
   name       = "aurora-subnet-group-unique"  # Updated unique name
   subnet_ids = [
     aws_subnet.private_subnet_aurora_a.id,
-    aws_subnet.private_subnet_aurora_b.id,
-    aws_subnet.public_subnet.id
+    aws_subnet.private_subnet_aurora_b.id
   ]
 
   tags = {
@@ -81,11 +80,11 @@ resource "aws_rds_cluster" "serverless_v2_aurora_pg" {
   db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
   vpc_security_group_ids = [aws_security_group.sg_for_aurora.id]
   database_name      = "galega"
-  engine_mode        = "serverless"
+  engine_mode        = "serverless"  # Correct mode for Serverless v2
 
   serverlessv2_scaling_configuration {
     max_capacity        = 6     # Max Aurora Capacity Units (ACUs)
-    min_capacity        = 2      # Min Aurora Capacity Units (ACUs)
+    min_capacity        = 2     # Min Aurora Capacity Units (ACUs)
   }
 
   tags = {
