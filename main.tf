@@ -61,8 +61,8 @@ resource "aws_rds_cluster" "serverless_aurora_pg" {
   engine_mode        = "serverless"
 
   scaling_configuration {
-    min_capacity = 1
-    max_capacity = 2
+    min_capacity = 2
+    max_capacity = 4
   }
 
   tags = {
