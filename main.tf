@@ -2,38 +2,18 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Reference to an existing VPC
 data "aws_vpc" "existing_vpc" {
-  id = "vpc-01fc04d120eab4343"
+  id = "vpc-0b61d907479dce654"
 }
 
-# Reference to the existing public subnet
-data "aws_subnet" "public_subnet" {
-  id = "subnet-0dd8d163c6bb3ad67"
+data "aws_subnet" "private_subnet_a" {
+  id = "subnet-04f9ca46ded59fd90"
 }
 
-# Create a new private subnet in the existing VPC
-resource "aws_subnet" "private_subnet_aurora_a" {
-  vpc_id            = data.aws_vpc.existing_vpc.id
-  cidr_block        = "10.1.11.0/24"
-  availability_zone = "us-east-1a"
-
-  tags = {
-    Name = "private_subnet_aurora_a"
-  }
+data "aws_subnet" "private_subnet_b" {
+  id = "subnet-08c15841245356c2d"
 }
 
-resource "aws_subnet" "private_subnet_aurora_b" {
-  vpc_id            = data.aws_vpc.existing_vpc.id
-  cidr_block        = "10.1.12.0/24"
-  availability_zone = "us-east-1b"
-
-  tags = {
-    Name = "private_subnet_aurora_b"
-  }
-}
-
-# Create a new security group in the existing VPC
 resource "aws_security_group" "sg_for_aurora" {
   vpc_id = data.aws_vpc.existing_vpc.id
 
@@ -56,35 +36,33 @@ resource "aws_security_group" "sg_for_aurora" {
   }
 }
 
-# Define the DB subnet group with the existing and new private subnets
 resource "aws_db_subnet_group" "db_subnet_group" {
-  name       = "aurora-subnet-group-unique"  # Updated unique name
+  name       = "aurora-subnet-group"
   subnet_ids = [
-    aws_subnet.private_subnet_aurora_a.id,
-    aws_subnet.private_subnet_aurora_b.id
+    data.aws_subnet.private_subnet_a.id,
+    data.aws_subnet.private_subnet_b.id
   ]
 
   tags = {
-    Name = "aurora-subnet-group-unique"  # Updated unique name
+    Name = "aurora-subnet-group"
   }
 }
 
-# Define the Aurora Serverless v1 RDS cluster
 resource "aws_rds_cluster" "serverless_aurora_pg" {
   engine             = "aurora-postgresql"
   engine_version     = "13.12"
-  cluster_identifier = "serverless-aurora-pg-cluster"  # Unique identifier
+  cluster_identifier = "serverless-aurora-pg-cluster"
   master_username    = var.db_master_username
   master_password    = var.db_master_password
   skip_final_snapshot = true
   db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
   vpc_security_group_ids = [aws_security_group.sg_for_aurora.id]
   database_name      = "galega"
-  engine_mode        = "serverless"  # Mode for Serverless v1
+  engine_mode        = "serverless"
 
   scaling_configuration {
-    min_capacity = 2  # Minimum Aurora Capacity Units (ACUs)
-    max_capacity = 4  # Maximum Aurora Capacity Units (ACUs)
+    min_capacity = 1
+    max_capacity = 2
   }
 
   tags = {
