@@ -14,6 +14,14 @@ data "aws_subnet" "private_subnet_b" {
   id = "subnet-08c15841245356c2d"
 }
 
+data "aws_subnet" "public_subnet_a" {
+  id = "subnet-07b65ef1ded04e9d6"
+}
+
+data "aws_subnet" "public_subnet_b" {
+  id = "subnet-0999fd6ccae257116"
+}
+
 resource "aws_security_group" "sg_for_aurora" {
   vpc_id = data.aws_vpc.existing_vpc.id
 
@@ -40,7 +48,9 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   name       = "aurora-subnet-group"
   subnet_ids = [
     data.aws_subnet.private_subnet_a.id,
-    data.aws_subnet.private_subnet_b.id
+    data.aws_subnet.private_subnet_b.id,
+    data.aws_subnet.public_subnet_a.id,
+    data.aws_subnet.public_subnet_b.id
   ]
 
   tags = {
