@@ -11,7 +11,7 @@ data "aws_subnet" "private_subnet_a" {
 }
 
 data "aws_subnet" "public_subnet_b" {
-  id = "subnet-0999fd6ccae257116"
+  id = "subnet-07b65ef1ded04e9d6"
 }
 
 resource "aws_security_group" "sg_for_aurora" {
