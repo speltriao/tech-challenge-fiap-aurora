@@ -63,6 +63,7 @@ resource "aws_rds_cluster" "serverless_aurora_pg" {
   scaling_configuration {
     min_capacity = 2
     max_capacity = 4
+    auto_pause   = false
   }
 
   tags = {
@@ -70,7 +71,6 @@ resource "aws_rds_cluster" "serverless_aurora_pg" {
   }
 }
 
-# Output the endpoint of the RDS cluster
 output "endpoint" {
   value = aws_rds_cluster.serverless_aurora_pg.endpoint
 }
