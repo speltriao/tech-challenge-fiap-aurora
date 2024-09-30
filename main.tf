@@ -3,15 +3,15 @@ provider "aws" {
 }
 
 data "aws_vpc" "existing_vpc" {
-  id = "vpc-01b9136934b023a96"
+  id = "vpc-071bea8d33ac95291"
 }
 
 data "aws_subnet" "private_subnet_a" {
-  id = "subnet-0f5c10c87cdf7d437"
+  id = "subnet-09160f318b11efe6d"
 }
 
 data "aws_subnet" "private_subnet_b" {
-  id = "subnet-006c1505f56e7c897"
+  id = "subnet-03c65c0f56d7b00d5"
 }
 
 resource "aws_security_group" "sg_for_aurora" {
